@@ -16,7 +16,7 @@ import lightgbm as lgb  # LightGBM library for gradient boosting
 from sklearn.cluster import KMeans  # KMeans clustering for unsupervised learning
 
 # Define the path to the dataset directory
-dataset_path = 'C:/Users/riyan/Downloads/CCMT_Final Dataset'
+dataset_path = 'C:/Users/riyan/Downloads/CCMT_Final_Dataset'
 
 # Function to load and preprocess images from the dataset
 # The dataset has "healthy" and "diseased" subfolders in each category
