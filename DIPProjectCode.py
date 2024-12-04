@@ -54,7 +54,7 @@ for category in nameforcategories:
     pathforcategoryfolder = os.path.join(dataset_path, category)  # Path to the specific category folder
     imgs, lbls = loadtheimagesandpreprocessthem(pathforcategoryfolder, labelmapforsubfolder)  # Load and preprocess images
     preprocessedimages.append(imgs)  # Append the processed images
-    labelscorrespondingtothem.append(lbls)  # Append the corresponding labels
+    labelscorrespodingtothem.append(lbls)  # Append the corresponding labels
 
 # Combine the images and labels from all categories into single arrays
 imagesstacked = np.vstack(preprocessedimages)  # Vertically stack the arrays of images
@@ -101,7 +101,7 @@ plt.ylabel("Feature Value")  # Label the y-axis
 plt.show()  # Show the plot
 
 # Extract features for all images in parallel to speed up computation
-allimagesfeatures = Parallel(n_jobs=-1)(delayed(featuresforasingleimage)(image) for image in imagesstacked)  # Extract features for all images
+allimagesfeatures = Parallel(n_jobs=-1)(delayed(extractionoffeaturesforasingleimage)(image) for image in imagesstacked)  # Extract features for all images
 
 # Standardize the extracted features to have zero mean and unit variance
 scaler = StandardScaler()  # Initialize the scaler
@@ -150,8 +150,8 @@ plt.show()  # Display the heatmap
 # Hybrid 2: PCA + Recursive Feature Elimination (RFE)
 # RFE selects the most important features from the PCA-reduced dataset
 modelrfe = RFE(estimator=RandomForestClassifier(n_estimators=100, random_state=42), n_features_to_select=50)  # Select 50 features
-rfetrainX = rfe_model.fit_transform(trainXpca, trainy)  # Apply RFE to training data
-rfetestX = rfe_model.transform(testXpca)  # Transform the test data based on RFE
+rfetrainX = modelrfe.fit_transform(trainXpca, trainy)  # Apply RFE to training data
+rfetestX = modelrfe.transform(testXpca)  # Transform the test data based on RFE
 
 # Train a Random Forest classifier on the reduced feature set
 rfemodelrf = RandomForestClassifier(n_estimators=300, random_state=42)  # Initialize Random Forest
@@ -179,10 +179,10 @@ def augment_features(image):
     meanvalue = np.mean(graylevelimage)  # Compute the mean intensity of the grayscale image
     variancevalue = np.var(graylevelimage)  # Compute the variance of the grayscale image
     featuresofglcm = extractionoffeaturesforasingleimage(image)  # Extract GLCM and histogram features
-    return np.hstack([featuresofglcm, manvalue, variancevalue])  # Combine all features into a single vector
+    return np.hstack([featuresofglcm, meanvalue, variancevalue])  # Combine all features into a single vector
 
 # Extract augmented features for all images in parallel
-featuresaugmented = Parallel(n_jobs=-1)(delayed(featuresaugmented)(image) for image in imagesstacked)  # Extract features
+featuresaugmented = Parallel(n_jobs=-1)(delayed(augment_features)(image) for image in imagesstacked)  # Extract features
 featuresaugmented = scaler.fit_transform(featuresaugmented)  # Standardize the features
 
 # Split the augmented feature dataset into training and testing sets
