@@ -50,7 +50,7 @@ labelscorrespodingtothem = []  # Will hold the corresponding labels
 labelmapforsubfolder = {'healthy': 0, 'diseased': 1}
 
 # Process the dataset for each crop category
-for category in categories:
+for category in nameforcategories:
     pathforcategoryfolder = os.path.join(dataset_path, category)  # Path to the specific category folder
     imgs, lbls = loadtheimagesandpreprocessthem(pathforcategoryfolder, labelmapforsubfolder)  # Load and preprocess images
     preprocessedimages.append(imgs)  # Append the processed images
@@ -210,28 +210,28 @@ plt.show()  # Display the heatmap
 # Hybrid 4: Clustering + Classification
 # Apply KMeans clustering to group images into clusters
 kmeans = KMeans(n_clusters=2, random_state=42)  # Initialize KMeans with 2 clusters
-cluster_labels = kmeans.fit_predict(features)  # Perform clustering and get cluster labels
+cluster_labels = kmeans.fit_predict(featuresnew)  # Perform clustering and get cluster labels
 
 # Combine cluster labels with existing features
-hybrid_features = np.hstack([features, cluster_labels.reshape(-1, 1)])  # Add cluster labels as a feature
+featureshybrid = np.hstack([featuresnew, cluster_labels.reshape(-1, 1)])  # Add cluster labels as a feature
 
 # Split the hybrid feature dataset into training and testing sets
-X_train_clust, X_test_clust, y_train_clust, y_test_clust = train_test_split(hybrid_features, labels, test_size=0.2, random_state=42, stratify=labels)
+trainXclust, testXclust, trainyclust, testyclust = train_test_split(featureshybrid, labelstacked, test_size=0.2, random_state=42, stratify=labelstacked)
 
 # Train a Random Forest classifier on the hybrid feature set
-rf_clustered = RandomForestClassifier(n_estimators=300, random_state=42)  # Initialize Random Forest
-rf_clustered.fit(X_train_clust, y_train_clust)  # Train the model
-y_pred_clustered = rf_clustered.predict(X_test_clust)  # Predict on the test set
+clusteredrf = RandomForestClassifier(n_estimators=300, random_state=42)  # Initialize Random Forest
+clusteredrf.fit(trainXclust, trainyclust)  # Train the model
+y_prediction_forclustereddata= clusteredrf.predict(testXclust)  # Predict on the test set
 
 # Display the accuracy and classification report for clustering + classification
 print("Hybrid 4: Clustering + Classification")
-print("Accuracy:", accuracy_score(y_test_clust, y_pred_clustered))  # Calculate accuracy
-print(classification_report(y_test_clust, y_pred_clustered, target_names=['Healthy', 'Diseased']))  # Detailed metrics
+print("Accuracy:", accuracy_score(testyclust, y_prediction_forclustereddata))  # Calculate accuracy
+print(classification_report(testyclust,y_prediction_forclustereddata, target_names=['Healthy', 'Diseased']))  # Detailed metrics
 
 # Generate confusion matrix for clustering + classification
-cm_cluster = confusion_matrix(y_test_clust, y_pred_clustered)  # Compute confusion matrix
+clustercm = confusion_matrix(testyclust, y_prediction_forclustereddata)  # Compute confusion matrix
 plt.figure(figsize=(6, 6))  # Set figure size
-sns.heatmap(cm_cluster, annot=True, fmt='d', cmap='Blues', xticklabels=['Healthy', 'Diseased'], yticklabels=['Healthy', 'Diseased'])  # Plot heatmap
+sns.heatmap(clustercm, annot=True, fmt='d', cmap='Blues', xticklabels=['Healthy', 'Diseased'], yticklabels=['Healthy', 'Diseased'])  # Plot heatmap
 plt.title('Confusion Matrix - Clustering + Classification')  # Add title
 plt.xlabel('Predicted')  # Label x-axis
 plt.ylabel('Actual')  # Label y-axis
